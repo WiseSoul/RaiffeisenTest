@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">RaiffeisenTest</string>
+    <string name="users_title">Users</string>
+    <string name="users_load_error">Unable to load users</string>
+    <string name="users_load_more_error">Unable to load more users</string>
+    <string name="try_again">Try again</string>
+    <string name="retry">Retry</string>
+    <string name="feature_not_implemented">Feature not yet implemented</string>
+    <string name="menu_content_description">Open menu</string>
+    <string name="search_content_description">Search users</string>
+    <string name="edit_content_description">Edit users</string>
+    <string name="user_avatar_content_description">%1$s avatar</string>
+    <string name="user_age_and_nationality">%1$d years from %2$s</string>
+    <string name="user_registration_date">Registered %1$s</string>
+</resources>
