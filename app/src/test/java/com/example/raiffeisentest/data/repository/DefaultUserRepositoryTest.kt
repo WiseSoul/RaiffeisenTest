@@ -25,7 +25,7 @@ class DefaultUserRepositoryTest {
             val users = repository.getUsers(page = 1, pageSize = 20)
 
             // Assert
-            assertEquals(1, api.requestedPage)
+            assertEquals(2, api.requestedPage)
             assertEquals(20, api.requestedPageSize)
             assertEquals("abc", api.requestedSeed)
             assertEquals("Ada Lovelace", users.single().fullName)

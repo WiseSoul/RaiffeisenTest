@@ -13,12 +13,13 @@ internal class RandomUserRemoteDataSource(
     ): List<UserDto> =
         randomUserApi
             .getUsers(
-                page = page,
+                page = page + API_FIRST_PAGE,
                 pageSize = pageSize,
                 seed = API_SEED,
             ).users
 
     private companion object {
+        private const val API_FIRST_PAGE = 1
         private const val API_SEED = "abc"
     }
 }

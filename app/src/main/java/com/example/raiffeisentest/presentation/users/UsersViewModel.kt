@@ -26,7 +26,7 @@ internal class UsersViewModel(
 
     /** Requests another page when the last visible row enters the prefetch window. */
     fun onLastVisibleItemChanged(index: Int) {
-        val users = (uiState.value as? UsersUiState.Content)?.users.orEmpty()
+        val users = currentUsers()
         val prefetchIndex = users.lastIndex - GetUsersPageUseCase.PREFETCH_DISTANCE
 
         if (users.isNotEmpty() && index >= prefetchIndex) {
@@ -40,45 +40,61 @@ internal class UsersViewModel(
     }
 
     private fun loadNextPage() {
-        if (isRequestInProgress || nextPage >= GetUsersPageUseCase.MAX_PAGE_COUNT) {
-            return
-        }
+        if (!canLoadNextPage()) return
 
-        val currentUsers = (uiState.value as? UsersUiState.Content)?.users.orEmpty()
+        val currentUsers = currentUsers()
         isRequestInProgress = true
-        mutableUiState.value =
-            if (currentUsers.isEmpty()) {
-                UsersUiState.Loading
-            } else {
-                UsersUiState.Content(
-                    users = currentUsers,
-                    isLoadingMore = true,
-                )
-            }
+        showLoading(currentUsers)
 
         viewModelScope.launch {
             try {
                 val newUsers = getUsersPageUseCase(nextPage)
                 nextPage++
-                mutableUiState.value =
-                    UsersUiState.Content(
-                        users = (currentUsers + newUsers).distinctBy(User::id),
-                    )
+                showUsers(currentUsers + newUsers)
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: Throwable) {
-                mutableUiState.value =
-                    if (currentUsers.isEmpty()) {
-                        UsersUiState.Error
-                    } else {
-                        UsersUiState.Content(
-                            users = currentUsers,
-                            hasLoadMoreError = true,
-                        )
-                    }
+                showError(currentUsers)
             } finally {
                 isRequestInProgress = false
             }
         }
+    }
+
+    private fun canLoadNextPage(): Boolean =
+        !isRequestInProgress && nextPage < GetUsersPageUseCase.MAX_PAGE_COUNT
+
+    private fun currentUsers(): List<User> =
+        (uiState.value as? UsersUiState.Content)?.users.orEmpty()
+
+    private fun showLoading(users: List<User>) {
+        mutableUiState.value =
+            if (users.isEmpty()) {
+                UsersUiState.Loading
+            } else {
+                UsersUiState.Content(
+                    users = users,
+                    isLoadingMore = true,
+                )
+            }
+    }
+
+    private fun showUsers(users: List<User>) {
+        mutableUiState.value =
+            UsersUiState.Content(
+                users = users.distinctBy(User::id),
+            )
+    }
+
+    private fun showError(users: List<User>) {
+        mutableUiState.value =
+            if (users.isEmpty()) {
+                UsersUiState.Error
+            } else {
+                UsersUiState.Content(
+                    users = users,
+                    hasLoadMoreError = true,
+                )
+            }
     }
 }
